@@ -78,7 +78,7 @@ class TrainMain:
                 running_loss_cls += loss_cls
                 # running_loss_ft += loss_ft
                 running_loss += loss
-                running_acc += acc
+                running_acc += acc[0]
 
                 self.step += 1
 
@@ -86,7 +86,7 @@ class TrainMain:
                 #     time_stamp = get_time()
                 #     self._save_state(time_stamp, extra=self.conf.job_name)
             
-            print(f'Loss: {running_loss} -- Loss_cls: {running_loss_cls} -- Acc: {running_acc}')
+            print(f'\nLoss: {round(running_loss, 3)} -- Loss_cls: {round(running_loss_cls, 3)} -- Acc: {round(running_acc, 3)}')
 
             self.history['loss'].append(running_loss)
             self.history['loss_cls'].append(running_loss_cls)
@@ -142,4 +142,4 @@ class TrainMain:
     def _save_state(self, time_stamp, extra=None):
         save_path = self.conf.model_path
         torch.save(self.model.state_dict(), save_path + '/' +
-                   ('{}_{}.pth'.format(self.conf.patch_ifo, self.conf.model_type)))
+                   ('{}_{}.pth'.format(self.conf.patch_info, self.conf.model_type)))
