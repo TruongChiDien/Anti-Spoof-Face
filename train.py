@@ -18,6 +18,8 @@ def parse_args():
     parser.add_argument("--device_ids", type=str, default="1", help="which gpu id, 0123")
     parser.add_argument("--patch_info", type=str, default="1_80x80",
                         help="[org_1_80x60 / 1_80x80 / 2.7_80x80 / 4_80x80]")
+    parser.add_argument("--model_type", type=str, default="MiniFASNetV2SE", help="Model type")
+
     args = parser.parse_args()
     cuda_devices = [int(elem) for elem in args.device_ids]
     os.environ["CUDA_VISIBLE_DEVICES"] = ','.join(map(str, cuda_devices))

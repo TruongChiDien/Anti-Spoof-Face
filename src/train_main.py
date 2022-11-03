@@ -13,10 +13,16 @@ from tensorboardX import SummaryWriter
 
 from src.utility import get_time
 from src.model_lib.MultiFTNet import MultiFTNet
-from src.model_lib.MiniFASNet import MiniFASNetV2SE
+from src.model_lib.MiniFASNet import *
 
 from src.data_io.dataset_loader import get_train_loader
 
+MODEL_MAPPING = {
+    'MiniFASNetV1': MiniFASNetV1,
+    'MiniFASNetV2': MiniFASNetV2,
+    'MiniFASNetV1SE':MiniFASNetV1SE,
+    'MiniFASNetV2SE':MiniFASNetV2SE
+}
 
 class TrainMain:
     def __init__(self, conf):
@@ -49,11 +55,9 @@ class TrainMain:
 
     def _train_stage(self):
         self.model.train()
-        running_loss = 0.
-        running_acc = 0.
-        running_loss_cls = 0.
-        running_loss_ft = 0.
+        
         is_first = True
+        self.history = {'loss': [], 'acc': [], 'loss_cls': []}
         for e in range(self.start_epoch, self.conf.epochs):
             if is_first:
                 self.writer = SummaryWriter(self.conf.log_path)
@@ -61,6 +65,10 @@ class TrainMain:
             print('epoch {} started'.format(e))
             print("lr: ", self.schedule_lr.get_lr())
 
+            running_loss = 0.
+            running_acc = 0.
+            running_loss_cls = 0.
+            
             for sample, ft_sample, target in tqdm(iter(self.train_loader)):
                 imgs = [sample, ft_sample]
                 labels = target - 1
@@ -74,30 +82,16 @@ class TrainMain:
 
                 self.step += 1
 
-                if self.step % self.board_loss_every == 0 and self.step != 0:
-                    loss_board = running_loss / self.board_loss_every
-                    self.writer.add_scalar(
-                        'Training/Loss', loss_board, self.step)
-                    acc_board = running_acc / self.board_loss_every
-                    self.writer.add_scalar(
-                        'Training/Acc', acc_board, self.step)
-                    lr = self.optimizer.param_groups[0]['lr']
-                    self.writer.add_scalar(
-                        'Training/Learning_rate', lr, self.step)
-                    loss_cls_board = running_loss_cls / self.board_loss_every
-                    self.writer.add_scalar(
-                        'Training/Loss_cls', loss_cls_board, self.step)
-                    # loss_ft_board = running_loss_ft / self.board_loss_every
-                    # self.writer.add_scalar(
-                    #     'Training/Loss_ft', loss_ft_board, self.step)
+                # if self.step % self.save_every == 0 and self.step != 0:
+                #     time_stamp = get_time()
+                #     self._save_state(time_stamp, extra=self.conf.job_name)
+            
+            print(f'Loss: {running_loss} -- Loss_cls: {running_loss_cls} -- Acc: {running_acc}')
 
-                    running_loss = 0.
-                    running_acc = 0.
-                    running_loss_cls = 0.
-                    # running_loss_ft = 0.
-                if self.step % self.save_every == 0 and self.step != 0:
-                    time_stamp = get_time()
-                    self._save_state(time_stamp, extra=self.conf.job_name)
+            self.history['loss'].append(running_loss)
+            self.history['loss_cls'].append(running_loss_cls)
+            self.history['acc'].append(running_acc)
+
             self.schedule_lr.step()
 
         time_stamp = get_time()
@@ -127,7 +121,7 @@ class TrainMain:
             'embedding_size': self.conf.embedding_size,
             'conv6_kernel': self.conf.kernel_size}
 
-        model = MiniFASNetV2SE(**param).to(self.conf.device)
+        model = MODEL_MAPPING[self.conf.model_type](**param).to(self.conf.device)
         model = torch.nn.DataParallel(model, self.conf.devices)
         model.to(self.conf.device)
         return model
@@ -148,4 +142,4 @@ class TrainMain:
     def _save_state(self, time_stamp, extra=None):
         save_path = self.conf.model_path
         torch.save(self.model.state_dict(), save_path + '/' +
-                   ('{}_{}_model_iter-{}.pth'.format(time_stamp, extra, self.step)))
+                   ('{}_{}.pth'.format(self.conf.patch_ifo, self.conf.model_type)))

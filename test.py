@@ -31,7 +31,7 @@ def check_image(image):
         return True
 
 
-def test(image_name, model_dir, device_id):
+def test(image_name, model_dir, device_id, num_classes):
     model_test = AntiSpoofPredict(device_id)
     image_cropper = CropImage()
     image = cv2.imread(SAMPLE_IMAGE_PATH + image_name)
@@ -56,7 +56,7 @@ def test(image_name, model_dir, device_id):
             param["crop"] = False
         img = image_cropper.crop(**param)
         start = time.time()
-        prediction += model_test.predict(img, os.path.join(model_dir, model_name))
+        prediction += model_test.predict(img, os.path.join(model_dir, model_name), num_classes = num_classes)
         test_speed += time.time()-start
 
     # draw result of prediction
@@ -105,5 +105,10 @@ if __name__ == "__main__":
         type=str,
         default="image_F1.jpg",
         help="image used to test")
+    parser.add_argument(
+        "--num_class",
+        type=int,
+        default=2,
+        help="Number of classes")    
     args = parser.parse_args()
     test(args.image_name, args.model_dir, args.device_id)

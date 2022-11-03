@@ -62,7 +62,7 @@ def update_config(args, conf):
     current_time = datetime.now().strftime('%b%d_%H-%M-%S')
     job_name = 'Anti_Spoofing_{}'.format(args.patch_info)
     log_path = '{}/{}/{} '.format(conf.log_path, job_name, current_time)
-    snapshot_dir = '{}/{}'.format(conf.snapshot_dir_path, job_name)
+    snapshot_dir = '{}/{}'.format(conf.snapshot_dir_path, args.patch_info)
 
     make_if_not_exist(snapshot_dir)
     make_if_not_exist(log_path)
