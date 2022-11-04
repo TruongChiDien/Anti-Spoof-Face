@@ -18,10 +18,11 @@ def get_kernel(height, width):
     return kernel_size
 
 
-def get_width_height(patch_info):
-    w_input = int(patch_info.split('x')[-1])
-    h_input = int(patch_info.split('x')[0].split('_')[-1])
-    return w_input,h_input
+def get_scale_width_height(patch_info):
+    pieces = patch_info.split('_')
+    scale, HxW = int(pieces[-2]), pieces[-1]
+    h_input, w_input = map(int, HxW.split('x'))
+    return scale,w_input,h_input
 
 
 def parse_model_name(model_name):
