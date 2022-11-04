@@ -23,7 +23,7 @@ class DatasetFolderFT(datasets.ImageFolder):
         super(DatasetFolderFT, self).__init__(root, transform, target_transform, loader)
         self.root = root
         folder_name = root.split(os.sep)[-1]
-        self.ft_root = 'ft_' + folder_name
+        self.ft_root = root.replace(folder_name, 'ft_' + folder_name)
         self.ft_width = ft_width
         self.ft_height = ft_height
 
@@ -31,8 +31,8 @@ class DatasetFolderFT(datasets.ImageFolder):
         path, target = self.samples[index]
         sample = self.loader(path)
         # generate the FT picture of the sample
-        img_relative_path = os.sep.join(path.split(os.sep)[-2:])
-        ft_sample = np.load(os.join(self.ft_root, img_relative_path))
+        img_cls, img_name = path.split(os.sep)[-2:]
+        ft_sample = np.load(os.path.join(self.ft_root, img_cls, img_name.split('.')[0] + '.npy'))
         if sample is None:
             print('image is None --> ', path)
         if ft_sample is None:
