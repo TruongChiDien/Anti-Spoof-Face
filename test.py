@@ -39,10 +39,11 @@ def test(image_name, model_dir, device_id, num_classes):
     if result is False:
         return
     image_bbox = model_test.get_bbox(image)
-    prediction = np.zeros((1, 3))
+    prediction = np.zeros((1, num_classes))
     test_speed = 0
     # sum the prediction from single model's result
-    for model_name in os.listdir(model_dir):
+    model_dirs = os.listdir(model_dir)
+    for model_name in model_dirs:
         h_input, w_input, model_type, scale = parse_model_name(model_name)
         param = {
             "org_img": image,
@@ -61,7 +62,7 @@ def test(image_name, model_dir, device_id, num_classes):
 
     # draw result of prediction
     label = np.argmax(prediction)
-    value = prediction[0][label]/2
+    value = prediction[0][label]/len(model_dirs)
     if label == 1:
         print("Image '{}' is Real Face. Score: {:.2f}.".format(image_name, value))
         result_text = "RealFace Score: {:.2f}".format(value)
@@ -106,9 +107,9 @@ if __name__ == "__main__":
         default="image_F1.jpg",
         help="image used to test")
     parser.add_argument(
-        "--num_class",
+        "--num_classes",
         type=int,
         default=2,
         help="Number of classes")    
     args = parser.parse_args()
-    test(args.image_name, args.model_dir, args.device_id)
+    test(args.image_name, args.model_dir, args.device_id, args.num_classes)

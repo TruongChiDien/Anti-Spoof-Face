@@ -9,6 +9,7 @@ import cv2
 import torch
 from torchvision import datasets
 import numpy as np
+import os
 
 
 def opencv_loader(path):
@@ -21,6 +22,8 @@ class DatasetFolderFT(datasets.ImageFolder):
                  ft_width=10, ft_height=10, loader=opencv_loader):
         super(DatasetFolderFT, self).__init__(root, transform, target_transform, loader)
         self.root = root
+        folder_name = root.split(os.sep)[-1]
+        self.ft_root = 'ft_' + folder_name
         self.ft_width = ft_width
         self.ft_height = ft_height
 
@@ -28,7 +31,8 @@ class DatasetFolderFT(datasets.ImageFolder):
         path, target = self.samples[index]
         sample = self.loader(path)
         # generate the FT picture of the sample
-        ft_sample = generate_FT(sample)
+        img_relative_path = os.sep.join(path.split(os.sep)[-2:])
+        ft_sample = np.load(os.join(self.ft_root, img_relative_path))
         if sample is None:
             print('image is None --> ', path)
         if ft_sample is None:
@@ -61,5 +65,5 @@ def generate_FT(image):
             maxx = max(fimg[i])
         if minn > min(fimg[i]):
             minn = min(fimg[i])
-    fimg = (fimg - minn+1) / (maxx - minn+1)
+    fimg = (fimg - minn+1) / (maxx - minn+1)    # Normalize
     return fimg

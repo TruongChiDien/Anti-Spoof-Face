@@ -69,24 +69,26 @@ class TrainMain:
             running_acc = 0.
             running_loss_cls = 0.
             
+            n_iters = 0
             for sample, ft_sample, target in tqdm(iter(self.train_loader)):
                 imgs = [sample, ft_sample]
-                labels = target - 1
+                labels = target
 
                 # loss, acc, loss_cls, loss_ft = self._train_batch_data(imgs, labels)
                 loss, acc, loss_cls = self._train_batch_data(imgs, labels)
                 running_loss_cls += loss_cls
                 # running_loss_ft += loss_ft
                 running_loss += loss
-                running_acc += acc[0]
+                running_acc += acc
 
                 self.step += 1
+                n_iters += 1
 
                 # if self.step % self.save_every == 0 and self.step != 0:
                 #     time_stamp = get_time()
                 #     self._save_state(time_stamp, extra=self.conf.job_name)
             
-            print(f'\nLoss: {round(running_loss, 3)} -- Loss_cls: {round(running_loss_cls, 3)} -- Acc: {round(running_acc, 3)}')
+            print(f'\nLoss: {round(running_loss/n_iters, 3)} -- Loss_cls: {round(running_loss_cls/n_iters, 3)} -- Acc: {round(running_acc/n_iters, 3)}')
 
             self.history['loss'].append(running_loss)
             self.history['loss_cls'].append(running_loss_cls)
@@ -107,12 +109,12 @@ class TrainMain:
         # loss_fea = self.ft_criterion(feature_map, imgs[1].to(self.conf.device))
 
         # loss = 0.5*loss_cls + 0.5*loss_fea
-        loss = 0.5*loss_cls
+        loss = loss_cls
         acc = self._get_accuracy(embeddings, labels)[0]
         loss.backward()
         self.optimizer.step()
         # return loss.item(), acc, loss_cls.item(), loss_fea.item()
-        return loss.item(), acc, loss_cls.item()
+        return loss.item(), acc.item(), loss_cls.item()
 
     def _define_network(self):
         param = {
