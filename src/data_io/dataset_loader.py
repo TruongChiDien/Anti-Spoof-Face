@@ -21,13 +21,17 @@ def get_train_loader(conf):
         trans.RandomHorizontalFlip(),
         trans.ToTensor()
     ])
+    
     root_path = '{}/{}'.format(conf.train_root_path, conf.patch_info)
+    
     trainset = DatasetFolderFT(root_path, train_transform,
                                None, conf.ft_width, conf.ft_height)
+    
     train_loader = DataLoader(
         trainset,
         batch_size=conf.batch_size,
         shuffle=True,
         pin_memory=True,
         num_workers=16)
+
     return train_loader

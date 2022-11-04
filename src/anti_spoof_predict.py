@@ -53,24 +53,33 @@ class Detection:
 
 
 class AntiSpoofPredict(Detection):
-    def __init__(self, device_id):
+    def __init__(self, conf):
         super(AntiSpoofPredict, self).__init__()
-        self.device = torch.device("cuda:{}".format(device_id)
-                                   if torch.cuda.is_available() else "cpu")
+        self.device = conf.device
 
-    def _load_model(self, model_path, conf):
+    def _load_model(self, conf):
         # define model
-        model_name = os.path.basename(model_path)
-        h_input, w_input, model_type, _ = parse_model_name(model_name)
-        self.kernel_size = get_kernel(h_input, w_input,)
-        self.model = MODEL_MAPPING[model_type](
-            conv6_kernel=self.kernel_size, \
-            num_classes=conf.num_classes, 
-            embedding_size=conf.embedding_size, 
-            img_channel=conf.input_channel).to(self.device)
+        # model_name = os.path.basename(model_path)
+        # h_input, w_input, model_type, _ = parse_model_name(model_name)
+        # self.kernel_size = get_kernel(h_input, w_input,)
+
+        # self.model = MODEL_MAPPING[conf.model_type](
+        #     conv6_kernel=self.kernel_size, \
+        #     num_classes=conf.num_classes, 
+        #     embedding_size=conf.embedding_size, 
+        #     img_channel=conf.input_channel).to(self.device)
+
+        param = {
+            'num_classes': conf.num_classes,
+            'img_channel': conf.input_channel,
+            'embedding_size': conf.embedding_size,
+            'conv6_kernel': conf.kernel_size
+        }
+
+        self.model = MODEL_MAPPING[self.conf.model_type](**param).to(self.device)
 
         # load model weight
-        state_dict = torch.load(model_path, map_location=self.device)
+        state_dict = torch.load(conf.model_path, map_location=self.device)
         keys = iter(state_dict)
         first_layer_name = keys.__next__()
         if first_layer_name.find('module.') >= 0:
@@ -84,13 +93,13 @@ class AntiSpoofPredict(Detection):
             self.model.load_state_dict(state_dict)
         return None
 
-    def predict(self, img, model_path, conf):
+    def predict(self, img, conf):
         test_transform = trans.Compose([
             trans.ToTensor(),
         ])
         img = test_transform(img)
         img = img.unsqueeze(0).to(self.device)
-        self._load_model(model_path, conf)
+        self._load_model(conf)
         self.model.eval()
         with torch.no_grad():
             result = self.model.forward(img)

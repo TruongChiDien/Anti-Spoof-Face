@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-# @Time : 20-6-4 下午2:13
-# @Author : zhuying
-# @Company : Minivision
-# @File : utility.py
-# @Software : PyCharm
-
 from datetime import datetime
 import os
 
@@ -18,11 +11,11 @@ def get_kernel(height, width):
     return kernel_size
 
 
-def get_scale_width_height(patch_info):
+def get_scale_heigh_width(patch_info):
     pieces = patch_info.split('_')
     scale, HxW = int(pieces[-2]), pieces[-1]
     h_input, w_input = map(int, HxW.split('x'))
-    return scale,w_input,h_input
+    return scale,h_input,w_input
 
 
 def parse_model_name(model_name):

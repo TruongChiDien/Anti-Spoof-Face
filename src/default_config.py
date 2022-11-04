@@ -1,34 +1,36 @@
 import torch
-from datetime import datetime
 from easydict import EasyDict
-from src.utility import make_if_not_exist, get_scale_width_height, get_kernel
+from src.utility import make_if_not_exist, get_scale_heigh_width, get_kernel
 import yaml
+
+def load_config(config_path):
+    with open(config_path) as f:
+        config_js = yaml.safe_load(f)
+
+    config = EasyDict(config_js)
+    return config
 
 def update_config(args):
     config_path = args.config
 
-    with open(config_path) as f:
-        config_js = yaml.safe_load(f)
+    conf = load_config(config_path)
 
-    conf = EasyDict(config_js)
+    scale, h_input, w_input = get_scale_heigh_width(conf.patch_info)
+    conf.scale, conf.h_input, conf.w_input = scale, h_input, w_input
 
-    scale, w_input, h_input = get_scale_width_height(conf.patch_info)
-    conf.input_size = [h_input, w_input]
-    conf.scale = scale
-    conf.kernel_size = get_kernel(h_input, w_input)
     conf.device = "cuda:{}".format(conf.devices[0]) if torch.cuda.is_available() else "cpu"
 
     # resize fourier image size
+    conf.kernel_size = get_kernel(h_input, w_input)
     conf.ft_height = 2*conf.kernel_size[0]
     conf.ft_width = 2*conf.kernel_size[1]
-    job_name = conf.patch_info
+
     snapshot_dir = '{}/{}'.format(conf.snapshot_dir_path, conf.patch_info)
 
     make_if_not_exist(snapshot_dir)
     make_if_not_exist(conf.log_path)
 
-    conf.model_path = snapshot_dir
-    conf.job_name = job_name
+    conf.model_path = "{}/{}_{}.pth".format(snapshot_dir, conf.patch_info, conf.model_type)
 
     return conf
 
