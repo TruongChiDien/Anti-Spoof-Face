@@ -19,7 +19,7 @@ def parse_args():
     # parser.add_argument("--patch_info", type=str, default="1_80x80",
     #                     help="[org_1_80x60 / 1_80x80 / 2.7_80x80 / 4_80x80]")
     # parser.add_argument("--model_type", type=str, default="MiniFASNetV2SE", help="Model type")
-    parser.add_argument("--config", type=str, default="config.json", help="Configuration file")
+    parser.add_argument("--config", type=str, default="config.yaml", help="Configuration file")
 
     args = parser.parse_args()
     cuda_devices = [int(elem) for elem in args.device_ids]

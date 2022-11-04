@@ -10,6 +10,7 @@
     "embedding_size": 128,
     "train_root_path": "./datasets/rgb_image",
     "snapshot_dir_path": "./saved_logs/snapshot",
+    "log_path": "./saved_logs/jobs/org_1_80x60",
     "board_loss_every": 10,
     "save_every": 30,
     "devices": [0],
