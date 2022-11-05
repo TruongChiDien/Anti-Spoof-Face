@@ -3,6 +3,7 @@ import torch
 from torchvision import datasets
 import numpy as np
 import os
+from pathlib import Path
 
 
 def opencv_loader(path):
@@ -47,8 +48,8 @@ class DatasetFolderFT(datasets.ImageFolder):
         path, target = self.samples[index]
         sample = self.loader(path)
         # generate the FT picture of the sample
-        sample_name = os.path.splitext(path)[0]
-        ft_sample_path = os.path.join(self.ft_root, target, sample_name + '.npy')
+        sample_name = Path(path).stem
+        ft_sample_path = os.path.join(self.ft_path, str(target), sample_name + '.npy')
         ft_sample = np.load(ft_sample_path)
         if sample is None:
             print('image is None --> ', path)

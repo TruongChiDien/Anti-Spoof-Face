@@ -55,7 +55,7 @@ class TrainMain:
             r_loss, r_ft_loss, r_acc = 0., 0., 0.
             train_iters = 0
             train_loader_iter = iter(self.train_loader)
-            for _ in tqdm(range(train_loader_iter)):
+            for _ in tqdm(range(len(train_loader_iter))):
                 if self.conf.model_type == 'MultiFTNet':
                     sample, ft_sample, target = next(train_loader_iter)
                     loss, ft_loss, acc = self.forward_batch(sample, ft_sample, target, train=True)
@@ -72,7 +72,7 @@ class TrainMain:
             r_val_loss, r_val_ft_loss, r_val_acc = 0., 0., 0.
             val_iters = 0
             val_loader_iter = iter(self.val_loader)
-            for _ in tqdm(range(val_loader_iter)):
+            for _ in tqdm(range(len(val_loader_iter))):
                 if self.conf.model_type == 'MultiFTNet':
                     sample, ft_sample, target = next(val_loader_iter)
                     val_loss, val_ft_loss, val_acc = self.forward_batch(sample, ft_sample, target, train=True)
@@ -86,9 +86,9 @@ class TrainMain:
                 val_iters += 1
 
             if self.conf.model_type == 'MultiFTNet':
-                print(f'loss: {round(r_loss/train_iters, 3)} \t ft_loss: {round(r_ft_loss/train_iters, 3)} \t acc: {round(r_acc/train_iters, 3)} \t val_loss: {round(r_val_loss/val_iters, 3)} \t val_ft_loss: {round(r_val_ft_loss/val_iters, 3)} \t val_acc: {round(r_val_acc/val_iters, 3)}')
+                print(f'\nloss: {round(r_loss/train_iters, 3)} \t ft_loss: {round(r_ft_loss/train_iters, 3)} \t acc: {round(r_acc/train_iters, 3)} \t val_loss: {round(r_val_loss/val_iters, 3)} \t val_ft_loss: {round(r_val_ft_loss/val_iters, 3)} \t val_acc: {round(r_val_acc/val_iters, 3)}')
             else:
-                print(f'loss: {round(r_loss/train_iters, 3)} \t acc: {round(r_acc/train_iters, 3)} \t val_loss: {round(r_val_loss/val_iters, 3)} \t val_acc: {round(r_val_acc/val_iters, 3)}')
+                print(f'\nloss: {round(r_loss/train_iters, 3)} \t acc: {round(r_acc/train_iters, 3)} \t val_loss: {round(r_val_loss/val_iters, 3)} \t val_acc: {round(r_val_acc/val_iters, 3)}')
 
             print("===" * 20)
 

@@ -22,4 +22,4 @@ w_input: 60
 save_every: 30
 snapshot_dir_path: ./saved_logs/snapshot
 org_root: ./datasets/org
-ft_root: ./dataset/ft
+ft_root: ./datasets/ft
