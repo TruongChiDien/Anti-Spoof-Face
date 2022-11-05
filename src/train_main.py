@@ -5,7 +5,7 @@ from tqdm import tqdm
 from src.model_lib.MultiFTNet import MultiFTNet
 from src.model_lib.MiniFASNet import *
 
-from src.data_io.dataset_loader import get_train_loader, get_val_loader
+from src.data_io.dataset_loader import get_ft_loader, get_normal_loader
 
 MODEL_MAPPING = {
     'MiniFASNetV1': MiniFASNetV1,
@@ -21,8 +21,8 @@ class TrainMain:
         self.board_loss_every = conf.board_loss_every
         self.save_every = conf.save_every
         self.start_epoch = 0
-        self.train_loader = get_train_loader(self.conf)
-        self.val_loader = get_val_loader(self.conf)
+        self.train_loader = get_ft_loader(self.conf)
+        self.val_loader = get_ft_loader(self.conf)
 
 
     def train_model(self):
