@@ -21,8 +21,12 @@ class TrainMain:
         self.board_loss_every = conf.board_loss_every
         self.save_every = conf.save_every
         self.start_epoch = 0
-        self.train_loader = get_ft_loader(self.conf)
-        self.val_loader = get_ft_loader(self.conf)
+        if conf.model_type == 'MultiFTNet':
+            self.train_loader = get_ft_loader(self.conf)
+            self.val_loader = get_ft_loader(self.conf)
+        else:
+            self.train_loader = get_normal_loader(self.conf)
+            self.val_loader = get_normal_loader(self.conf)
 
 
     def train_model(self):
