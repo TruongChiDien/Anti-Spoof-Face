@@ -76,7 +76,7 @@ class AntiSpoofPredict(Detection):
             'conv6_kernel': conf.kernel_size
         }
 
-        self.model = MODEL_MAPPING[self.conf.model_type](**param).to(self.device)
+        self.model = MODEL_MAPPING[conf.model_type](**param).to(self.device)
 
         # load model weight
         state_dict = torch.load(conf.model_path, map_location=self.device)

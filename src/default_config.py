@@ -15,13 +15,10 @@ def update_config(args):
 
     conf = load_config(config_path)
 
-    scale, h_input, w_input = get_scale_heigh_width(conf.patch_info)
-    conf.scale, conf.h_input, conf.w_input = scale, h_input, w_input
-
     conf.device = "cuda:{}".format(conf.devices[0]) if torch.cuda.is_available() else "cpu"
 
     # resize fourier image size
-    conf.kernel_size = get_kernel(h_input, w_input)
+    conf.kernel_size = get_kernel(conf.h_input, conf.w_input)
     conf.ft_height = 2*conf.kernel_size[0]
     conf.ft_width = 2*conf.kernel_size[1]
 

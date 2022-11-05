@@ -1,6 +1,6 @@
 import argparse
 from src.train_main import TrainMain
-from src.default_config import get_default_config, update_config
+from src.default_config import update_config, save_config
 
 
 def parse_args():
@@ -15,6 +15,6 @@ def parse_args():
 if __name__ == "__main__":
     args = parse_args()
     conf = update_config(args)
+    save_config(conf, 'configs/test_config.yaml')
     trainer = TrainMain(conf)
     trainer.train_model()
-

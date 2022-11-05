@@ -5,7 +5,7 @@ from tqdm import tqdm
 from src.model_lib.MultiFTNet import MultiFTNet
 from src.model_lib.MiniFASNet import *
 
-from src.data_io.dataset_loader import get_train_loader
+from src.data_io.dataset_loader import get_train_loader, get_val_loader
 
 MODEL_MAPPING = {
     'MiniFASNetV1': MiniFASNetV1,
@@ -22,6 +22,7 @@ class TrainMain:
         self.save_every = conf.save_every
         self.start_epoch = 0
         self.train_loader = get_train_loader(self.conf)
+        self.val_loader = get_val_loader(self.conf)
 
 
     def train_model(self):
@@ -46,37 +47,67 @@ class TrainMain:
 
     def _train_stage(self):
         self.model.train()
-        self.history = {'loss': [], 'ft_loss': [], 'acc': []}
+        self.history = {'loss': [], 'ft_loss': [], 'acc': [], 'val_loss': [], 'val_ft_loss': [], 'val_acc': []}
 
         for e in range(self.conf.epochs):
-            print('Epoch: {} --------- Learning rate: '.format(e, self.schedule_lr.get_lr()[0]))
-
+            print('Epoch: {} --------- Learning rate: {}'.format(e, self.schedule_lr.get_lr()[0]))
+            # Train epoch
             r_loss, r_ft_loss, r_acc = 0., 0., 0.
-            n_iters = 0
-
-            for sample, ft_sample, target in tqdm(iter(self.train_loader)):
+            train_iters = 0
+            train_loader_iter = iter(self.train_loader)
+            for _ in tqdm(range(train_loader_iter)):
                 if self.conf.model_type == 'MultiFTNet':
-                    loss, ft_loss, acc = self._train_batch_data(sample, ft_sample, target)
+                    sample, ft_sample, target = next(train_loader_iter)
+                    loss, ft_loss, acc = self.forward_batch(sample, ft_sample, target, train=True)
                     r_ft_loss += ft_loss
                 else:
-                    loss, acc = self._train_batch_data(sample, ft_sample, target)
+                    sample, target = next(train_loader_iter)
+                    loss, acc = self.forward_batch(sample, None, target, train=True)
 
-                r_loss, r_acc += loss, acc
-                n_iters += 1
-            print(f'\nLoss: {round(r_loss/n_iters, 3)} ---- Acc: {round(r_acc/n_iters, 3)}')
+                r_loss += loss
+                r_acc += acc
+                train_iters += 1
 
-            self.history['loss'].append(r_loss)
-            self.history['ft_loss'].append(ft_loss)
-            self.history['acc'].append(r_acc)
+            # Validate epoch
+            r_val_loss, r_val_ft_loss, r_val_acc = 0., 0., 0.
+            val_iters = 0
+            val_loader_iter = iter(self.val_loader)
+            for _ in tqdm(range(val_loader_iter)):
+                if self.conf.model_type == 'MultiFTNet':
+                    sample, ft_sample, target = next(val_loader_iter)
+                    val_loss, val_ft_loss, val_acc = self.forward_batch(sample, ft_sample, target, train=True)
+                    r_val_ft_loss += val_ft_loss
+                else:
+                    sample, target = next(val_loader_iter)
+                    val_loss, val_acc = self.forward_batch(sample, None, target, train=True)
+
+                r_val_loss += val_loss
+                r_val_acc += val_acc
+                val_iters += 1
+
+            if self.conf.model_type == 'MultiFTNet':
+                print(f'loss: {round(r_loss/train_iters, 3)} \t ft_loss: {round(r_ft_loss/train_iters, 3)} \t acc: {round(r_acc/train_iters, 3)} \t val_loss: {round(r_val_loss/val_iters, 3)} \t val_ft_loss: {round(r_val_ft_loss/val_iters, 3)} \t val_acc: {round(r_val_acc/val_iters, 3)}')
+            else:
+                print(f'loss: {round(r_loss/train_iters, 3)} \t acc: {round(r_acc/train_iters, 3)} \t val_loss: {round(r_val_loss/val_iters, 3)} \t val_acc: {round(r_val_acc/val_iters, 3)}')
+
+            print("===" * 20)
+
+            self.history['loss'].append(r_loss/train_iters)
+            self.history['ft_loss'].append(r_ft_loss/train_iters)
+            self.history['acc'].append(r_acc/train_iters)
+            self.history['val_loss'].append(r_val_loss/val_iters)
+            self.history['val_ft_loss'].append(r_val_ft_loss/val_iters)
+            self.history['val_acc'].append(r_val_acc/val_iters)
 
             self.schedule_lr.step()
 
         self._save_state()
 
 
-    def _train_batch_data(self, imgs, ft_imgs, labels):
+    def forward_batch(self, imgs, ft_imgs, labels, train=True):
         self.optimizer.zero_grad()
         labels = labels.to(self.conf.device)
+
         if self.conf.model_type == 'MultiFTNet':
             embeddings, feature_map = self.model.forward(imgs.to(self.conf.device))
             loss_cls = self.cls_criterion(embeddings, labels)
@@ -88,8 +119,10 @@ class TrainMain:
             loss = self.cls_criterion(embeddings, labels)
 
         acc = self._get_accuracy(embeddings, labels)[0]
-        loss.backward()
-        self.optimizer.step()
+
+        if train:
+            loss.backward()
+            self.optimizer.step()
 
         if self.conf.model_type == 'MultiFTNet':
             return loss_cls.item(), loss_ft.item(), acc.item()
@@ -126,4 +159,4 @@ class TrainMain:
 
 
     def _save_state(self):
-        torch.save(self.model.state_dict(), self.conf.save_path)
+        torch.save(self.model.state_dict(), self.conf.model_path)

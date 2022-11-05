@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-# @Time : 20-6-9 下午3:06
-# @Author : zhuying
-# @Company : Minivision
-# @File : test.py
-# @Software : PyCharm
-
 import os
 import cv2
 import numpy as np
@@ -29,7 +22,7 @@ def check_image(image):
 
 
 def test(image_path, conf):
-    model_test = AntiSpoofPredict(conf.devices[0])
+    model_test = AntiSpoofPredict(conf)
     image_cropper = CropImage()
     image = cv2.imread(image_path)
     # result = check_image(image)
