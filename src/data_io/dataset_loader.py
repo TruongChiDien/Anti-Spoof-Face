@@ -1,5 +1,5 @@
 from torch.utils.data import DataLoader
-from src.data_io.dataset_folder import DatasetFolderFT, DatasetFolder
+from src.data_io.dataset_folder_org import DatasetFolderFT, DatasetFolder
 from src.data_io import transform as trans
 import os
 

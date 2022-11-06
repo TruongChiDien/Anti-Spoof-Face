@@ -40,8 +40,8 @@ def parse_args():
     """parsing and configuration"""
     desc = "Generate Fourier Transform for dataset"
     parser = argparse.ArgumentParser(description=desc)
-    parser.add_argument("--data_path", type=str, default="datasets/org", help="path to dataset")
-    parser.add_argument("--ft_path", type=str, default="datasets/ft", help="path to save trasformed images")
+    parser.add_argument("--data_path", type=str, default="raw_data/org", help="path to dataset")
+    parser.add_argument("--ft_path", type=str, default="raw_data/ft", help="path to save trasformed images")
 
     args = parser.parse_args()
     return args
