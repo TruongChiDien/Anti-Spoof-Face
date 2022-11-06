@@ -22,11 +22,11 @@ class TrainMain:
         self.save_every = conf.save_every
         self.start_epoch = 0
         if conf.model_type == 'MultiFTNet':
-            self.train_loader = get_ft_loader(self.conf)
-            self.val_loader = get_ft_loader(self.conf)
+            self.train_loader = get_ft_loader(self.conf, set='train')
+            self.val_loader = get_ft_loader(self.conf, set='val')
         else:
-            self.train_loader = get_normal_loader(self.conf)
-            self.val_loader = get_normal_loader(self.conf)
+            self.train_loader = get_normal_loader(self.conf, set='train')
+            self.val_loader = get_normal_loader(self.conf, set='val')
 
 
     def train_model(self):

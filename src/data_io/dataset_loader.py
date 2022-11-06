@@ -45,8 +45,7 @@ def get_normal_loader(conf, set='train'):
     
 
     org_path = os.path.join(conf.org_root, set)
-    dataset = DatasetFolder(org_path, transform,
-                            None, conf.ft_width, conf.ft_height)
+    dataset = DatasetFolder(org_path, transform)
     
     loader = DataLoader(
         dataset,
