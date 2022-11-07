@@ -47,7 +47,7 @@ class DatasetFolder(datasets.ImageFolder):
 
 
 class DatasetFolderFT(datasets.ImageFolder):
-    def __init__(self, root, transform=None, target_transform=None,
+    def __init__(self, root, ft_root, transform=None, target_transform=None,
                  ft_width=10, ft_height=10, loader=opencv_loader):
         super(DatasetFolderFT, self).__init__(root, transform, target_transform, loader)
         if not os.path.exists(root):

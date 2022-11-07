@@ -79,11 +79,11 @@ class TrainMain:
             for _ in tqdm(range(len(val_loader_iter))):
                 if self.conf.model_type == 'MultiFTNet':
                     sample, ft_sample, target = next(val_loader_iter)
-                    val_loss, val_ft_loss, val_acc = self.forward_batch(sample, ft_sample, target, train=True)
+                    val_loss, val_ft_loss, val_acc = self.forward_batch(sample, ft_sample, target, train=False)
                     r_val_ft_loss += val_ft_loss
                 else:
                     sample, target = next(val_loader_iter)
-                    val_loss, val_acc = self.forward_batch(sample, None, target, train=True)
+                    val_loss, val_acc = self.forward_batch(sample, None, target, train=False)
 
                 r_val_loss += val_loss
                 r_val_acc += val_acc
