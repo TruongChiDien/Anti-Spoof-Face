@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-# @Time : 20-6-9 上午10:20
-# @Author : zhuying
-# @Company : Minivision
-# @File : anti_spoof_predict.py
-# @Software : PyCharm
-
 import os
 import cv2
 import math
@@ -58,17 +51,6 @@ class AntiSpoofPredict(Detection):
         self.device = conf.device
 
     def _load_model(self, conf):
-        # define model
-        # model_name = os.path.basename(model_path)
-        # h_input, w_input, model_type, _ = parse_model_name(model_name)
-        # self.kernel_size = get_kernel(h_input, w_input,)
-
-        # self.model = MODEL_MAPPING[conf.model_type](
-        #     conv6_kernel=self.kernel_size, \
-        #     num_classes=conf.num_classes, 
-        #     embedding_size=conf.embedding_size, 
-        #     img_channel=conf.input_channel).to(self.device)
-
         param = {
             'num_classes': conf.num_classes,
             'img_channel': conf.input_channel,

@@ -12,10 +12,10 @@ milestones:
 - 10
 - 15
 - 22
-model_type: MultiFTNet
+model_type: MiniFASNetV2SE
 momentum: 0.9
 num_classes: 2
-patch_info: test_ver_1
+patch_info: 2022-11-7
 scale: 1
 h_input: 80
 w_input: 60

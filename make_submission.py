@@ -1,9 +1,9 @@
 import pandas as pd
-import numpy as np
 from glob import glob
 import os
 import argparse
 import cv2
+from tqdm import tqdm
 from src.anti_spoof_predict import AntiSpoofPredict
 from src.generate_patches import CropImage
 from src.default_config import load_config
@@ -11,6 +11,7 @@ from src.default_config import load_config
 
 def load_model(conf):
     model = AntiSpoofPredict(conf)
+    model._load_model(conf)
     return model
 
 def make_prediction(args):
@@ -21,7 +22,7 @@ def make_prediction(args):
     predictions = []
     conf = load_config(args.config)
     model = load_model(conf)
-    for video in videos:
+    for video in tqdm(videos):
         video_name = os.path.basename(video)
         video_names.append(video_name)
         prediction = []
@@ -34,7 +35,8 @@ def make_prediction(args):
                 break
             prediction.append(predict(model, frame, conf))
 
-        confidence_score = round(sum(prediction)/len(prediction), 5)
+        # confidence_score = round(sum(prediction)/len(prediction), 5)
+        confidence_score = round(min(prediction), 5)
         predictions.append(confidence_score)
 
     df = pd.DataFrame(columns=['fname', 'liveness_score'])
@@ -48,22 +50,23 @@ def predict(model, image, conf):
     image_cropper = CropImage()
     param = {
         "org_img": image,
+        "bbox": [],
         "scale": conf.scale,
         "out_w": conf.w_input,
         "out_h": conf.h_input,
-        "crop": True,
+        "crop": False,
     }
     if conf.scale is None:
         param["crop"] = False
     img = image_cropper.crop(**param)
     prediction = model.predict(img, conf)
-    return prediction[1]
+    return prediction[0][1]
 
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--video_dirs', type=str, default='public')
+    parser.add_argument('--video_dirs', type=str, default='public/videos')
     parser.add_argument('--output', type=str, default='predict.csv')
     parser.add_argument('--config', type=str, default='configs/test_config.yaml')
 
